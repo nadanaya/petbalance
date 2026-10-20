@@ -1,14 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import { migrateBrandStorage } from "./lib/brand-storage";
-import "./styles/base.css";
-import "./styles/mobile.css";
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import SiteApp from './SiteApp'
+import './styles.css'
 
-try { migrateBrandStorage(window.localStorage); } catch { /* Storage may be unavailable. */ }
+// Prevent Chrome from restoring a previous pinned-story position before React mounts.
+if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
+window.scrollTo(0, 0)
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><SiteApp /></React.StrictMode>)
+

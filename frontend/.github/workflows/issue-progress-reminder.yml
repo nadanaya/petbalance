@@ -1,0 +1,140 @@
+name: Issue deadline and assignment bot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  manage:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify at 7, 3 and 1 days before deadline
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            if (repo !== 'Frontend') throw new Error('This workflow belongs to the Frontend repository.');
+            const plan = {"1":{"scope":"배포 API 연결·영양 기준 선택·오류 재시도와 실제 배포 검증","due":"2026-10-18"},"2":{"scope":"18개 영양소 입력·결과·근거 UI와 단위·출처·모바일 검증","due":"2026-10-22"},"3":{"scope":"정적 엔진·추천 결과 일치와 실패 안내·프로덕션 빌드 검증","due":"2026-10-23"}};
+            const sequence = [1, 2, 3];
+            const followUps = {
+              1: { title: '[Frontend] 운영 API 통합 회귀·배포 모니터링', scope: '실서비스 API 계약, 오류 추적, 모바일·데스크톱 배포 검증, 기준 버전·출처 일치 확인', effortDays: 5 },
+              2: { title: '[Frontend] 영양소 UI 접근성·성능 회귀 검증', scope: '18개 영양소 장문 결과의 키보드 접근성, 모바일 표시, 렌더링·필터 성능 검증', effortDays: 5 },
+              3: { title: '[Frontend] 추천 흐름 E2E·기록 연동 안정화', scope: '프로필→제품→분석→추천→재분석→기록 전체 흐름 E2E 및 실패 복구 검증', effortDays: 6 }
+            };
+
+            const seoulDateAfter = days => {
+              const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+              }).formatToParts(new Date()).filter(part => part.type !== 'literal').map(part => [part.type, Number(part.value)]));
+              const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + days));
+              return date.toISOString().slice(0, 10);
+            };
+
+            if (context.eventName === 'issues' && context.payload.action === 'closed') {
+              const closed = context.payload.issue;
+              const assignees = (closed.assignees || []).map(user => user.login);
+              const index = sequence.indexOf(closed.number);
+              const candidates = index >= 0 ? sequence.slice(index + 1) : [];
+              let nextNumber = null;
+              for (const number of candidates) {
+                const candidate = await github.rest.issues.get({ owner, repo, issue_number: number });
+                if (candidate.data.state === 'open') { nextNumber = number; break; }
+              }
+              if (nextNumber) {
+                const next = await github.rest.issues.get({ owner, repo, issue_number: nextNumber });
+                if (next.data.state === 'open') {
+                  if (assignees.length) {
+                    await github.rest.issues.addAssignees({ owner, repo, issue_number: nextNumber, assignees });
+                  }
+                  const item = plan[nextNumber];
+                  await github.rest.issues.createComment({
+                    owner, repo, issue_number: nextNumber,
+                    body: `<!-- next-work:${closed.number}:${nextNumber} -->\n${assignees.map(login => `@${login}`).join(' ')}\n\n이전 이슈 #${closed.number} 완료를 확인해 다음 작업을 배정합니다.\n\n- 작업 범위: ${item.scope}\n- 마감일: **${item.due}**\n- 제출 기준: 최신 main 기반 PR, 검증 결과, 남은 차단 요인`
+                  });
+                }
+                return;
+              }
+
+              const marker = `<!-- generated-from:${owner}/${repo}#${closed.number} -->`;
+              const allIssues = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: 'all', per_page: 100 });
+              if (allIssues.some(issue => (issue.body || '').includes(marker))) return;
+
+              const template = followUps[closed.number] || {
+                title: `[Frontend] ${closed.title} 후속 검증·안정화`,
+                scope: `#${closed.number} 결과의 회귀 검증, 배포 확인, 남은 오류와 접근성 문제 해소`,
+                effortDays: 5
+              };
+              const due = seoulDateAfter(template.effortDays);
+              const created = await github.rest.issues.create({
+                owner, repo, title: template.title, assignees,
+                body: `${marker}\n## 작업 목표\n${template.scope}\n\n## 완료 기준\n- 최신 main 기반 PR 연결\n- 데스크톱·모바일 검증 결과 첨부\n- 오류·남은 차단 요인 기록\n- 의료 기준·제품 데이터는 검증 출처가 없으면 데모 한계 명시\n\n마감일: **${due}**\n원본 이슈: #${closed.number}`
+              });
+              await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/issue-field-values', {
+                owner, repo, issue_number: created.data.number,
+                issue_field_values: [{ field_id: 46958333, value: due }],
+                headers: { 'X-GitHub-Api-Version': '2026-03-10' }
+              });
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: closed.number,
+                body: `후속 작업 #${created.data.number}을(를) 생성하고 ${assignees.map(login => `@${login}`).join(' ')}에게 배정했습니다. 마감일은 **${due}**입니다.`
+              });
+              return;
+            }
+
+            const dateParts = value => Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+              timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+            }).formatToParts(value).filter(part => part.type !== 'literal').map(part => [part.type, Number(part.value)]));
+            const now = new Date();
+            const current = dateParts(now);
+            const todayUtc = Date.UTC(current.year, current.month - 1, current.day);
+            const reminderDays = new Set([7, 3, 1]);
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', per_page: 100
+            });
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              owner, repo, state: 'all', per_page: 100
+            });
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+              const dueMatch = (issue.body || '').match(/마감일:\s*\*\*(\d{4}-\d{2}-\d{2})\*\*/);
+              const item = plan[issue.number] || (dueMatch ? { scope: issue.title, due: dueMatch[1] } : null);
+              if (!item) continue;
+              const [year, month, day] = item.due.split('-').map(Number);
+              const daysLeft = Math.round((Date.UTC(year, month - 1, day) - todayUtc) / 86400000);
+              if (!reminderDays.has(daysLeft)) continue;
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: issue.number, per_page: 100
+              });
+              const marker = `<!-- deadline-progress:${issue.number}:${item.due}:${daysLeft} -->`;
+              if (comments.some(comment => (comment.body || '').includes(marker))) continue;
+
+              const intervalDays = daysLeft === 7 ? 7 : daysLeft === 3 ? 4 : 2;
+              const since = new Date(now.getTime() - intervalDays * 86400000);
+              const humanUpdate = comments.some(comment =>
+                new Date(comment.created_at) > since && comment.user.type !== 'Bot'
+              );
+              const linkedPr = pulls.some(pr => {
+                const text = `${pr.title}\n${pr.body || ''}`;
+                return new Date(pr.updated_at) > since && text.includes(`#${issue.number}`);
+              });
+              const commits = await github.paginate(github.rest.repos.listCommits, {
+                owner, repo, since: since.toISOString(), per_page: 100
+              });
+              const linkedCommit = commits.some(commit =>
+                (commit.commit.message || '').includes(`#${issue.number}`)
+              );
+              if (humanUpdate || linkedPr || linkedCommit) continue;
+
+              const assignees = (issue.assignees || []).map(user => `@${user.login}`).join(' ');
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issue.number,
+                body: `${marker}\n${assignees}\n\n마감 ${daysLeft}일 전 점검에서 최근 작업 증거를 찾지 못했습니다.\n\n- 작업 범위: ${item.scope}\n- 마감일: **${item.due}**\n- 제출 기준: 최신 main 기반 PR, 검증 결과, 남은 차단 요인\n\n의료 기준·제품 데이터는 검증된 출처가 확인될 때까지 데모 범위와 한계를 PR에 명시해 주세요.`
+              });
+            }

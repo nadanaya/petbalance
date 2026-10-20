@@ -1,2 +1,4 @@
 target/
-*.log
+.tools/
+apache-maven-*-bin.zip
+hs_err_pid*.log
