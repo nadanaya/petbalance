@@ -1,0 +1,18 @@
+[services.web]
+root = "frontend/"
+
+[services.api]
+root = "."
+entrypoint = "api.index:app"
+
+[[rewrites]]
+source = "/api/(.*)"
+destination = { service = "api" }
+
+[[rewrites]]
+source = "/health"
+destination = { service = "api" }
+
+[[rewrites]]
+source = "/(.*)"
+destination = { service = "web" }
