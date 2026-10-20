@@ -192,9 +192,9 @@ cd frontend && npm run build                 # 프론트 타입체크 + 프로�
 
 ## 프로젝트
 
-- [petbalance GitHub 조직](https://github.com/PetBalance)
-- [전체 저장소 목록](https://github.com/orgs/PetBalance/repositories)
-- [petbalance 소스 코드 — 웹·앱·백엔드](https://github.com/petbalance/backend)
-- [프런트엔드 — React 웹·Android 앱](https://github.com/petbalance/Frontend)
+- [petbalance GitHub 조직](https://github.com/nadanaya)
+- [전체 저장소 목록](https://github.com/nadanaya?tab=repositories)
+- [petbalance 소스 코드 — 웹·앱·백엔드](https://github.com/nadanaya/backend)
+- [프런트엔드 — React 웹·Android 앱](https://github.com/nadanaya/Frontend)
 
 > 현재 영양 기준·제품·가격 데이터는 기능 검증용 데모입니다. 실제 급여 판단이나 수의학적 처방을 대체하지 않습니다.
