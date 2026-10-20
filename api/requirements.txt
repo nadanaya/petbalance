@@ -1,0 +1,10 @@
+# Vercel resolves Python dependencies relative to the serverless entrypoint.
+# Keep this in sync with the runtime subset of the repository root requirements.
+fastapi>=0.111,<1
+pandas>=2.0,<3
+SQLAlchemy>=2.0,<3
+pydantic>=2.7,<3
+python-multipart>=0.0.18
+anthropic>=0.40
+pillow>=10.0
+pytesseract>=0.3.10
