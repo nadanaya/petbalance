@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="1180" viewBox="0 0 1560 1180" role="img" aria-labelledby="title desc">
+<title id="title">petbalance 서비스 아키텍처</title>
+<desc id="desc">개인용 React와 Electron 앱은 FastAPI를 이용하고 실행 환경에 따라 SQLite 또는 PostgreSQL에 저장합니다. Spring Boot는 별도 SQLite와 CSV를 사용하는 전환 검증 구현입니다. 보호소 Next.js 앱은 자체 API와 Neon PostgreSQL을 사용합니다. 세 영역 사이에 런타임 호출을 나타내는 연결선은 없습니다.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 8 5 1 9" fill="none" stroke="#648078" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  <style>
+    text { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 2px; }
+    .heading { font-size: 27px; font-weight: 700; fill: #153e36; }
+    .name { font-size: 25px; font-weight: 700; fill: #183e37; }
+    .body { font-size: 18px; fill: #52685f; }
+    .small { font-size: 16px; fill: #52685f; }
+    .label { font-size: 15px; font-weight: 700; fill: #55766b; letter-spacing: .7px; }
+    .card { fill: #fff; stroke: #d9e3dd; stroke-width: 1.5; }
+    .link { fill: none; stroke: #648078; stroke-width: 2.2; marker-end: url(#arrow); }
+  </style>
+</defs>
+<rect width="1560" height="1180" rx="28" fill="#f5f6f0"/>
+<text x="56" y="54" class="eyebrow" fill="#367864">PETBALANCE / SYSTEM OVERVIEW</text>
+<text x="56" y="111" font-size="43" font-weight="700" fill="#153e36">petbalance 서비스 아키텍처</text>
+<text x="56" y="149" font-size="20" fill="#52685f">개인 식단 분석과 보호소 운영, 각 서비스의 실행 경계와 데이터 흐름</text>
+<rect x="1290" y="65" width="214" height="37" rx="18" fill="#e1ebe4"/>
+<text x="1397" y="90" text-anchor="middle" font-size="15" font-weight="700" fill="#376b58">현행 구조 · 전환 검증 구분</text>
+<rect x="48" y="190" width="500" height="812" rx="18" fill="#eaf2ec" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="72" y="226" class="eyebrow">01</text>
+<text x="72" y="267" class="heading">개인용 앱</text>
+<text x="72" y="296" class="small">현재 기본 연결</text>
+<rect x="574" y="190" width="414" height="812" rx="18" fill="#f4efe4" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="598" y="226" class="eyebrow">02</text>
+<text x="598" y="267" class="heading">Spring 전환 검증</text>
+<text x="598" y="296" class="small">별도 실행 · 호환성 검증 대상</text>
+<rect x="1014" y="190" width="498" height="812" rx="18" fill="#eaf0f6" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="1038" y="226" class="eyebrow">03</text>
+<text x="1038" y="267" class="heading">보호소 운영 웹</text>
+<text x="1038" y="296" class="small">독립 서비스</text>
+<rect x="72" y="324" width="452" height="143" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="94" y="353" class="label">CLIENT</text>
+<text x="94" y="389" class="name">React + Vite</text>
+<text x="94" y="421" class="body">브라우저 / Electron 데스크톱</text>
+<text x="94" y="448" class="body">급여조합 · 영양소 분석 · 제품 관리</text>
+<path d="M298 467V516" class="link"/>
+<text x="313" y="497.5" class="small">HTTP / JSON</text>
+<rect x="72" y="520" width="452" height="160" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="94" y="549" class="label">APPLICATION API · :8756</text>
+<text x="94" y="585" class="name">FastAPI</text>
+<text x="94" y="617" class="body">인증 · 분석 · 식단 저장</text>
+<text x="94" y="644" class="body">OCR 초안 · 추천 · 가격 조회</text>
+<path d="M298 680V715" fill="none" stroke="#648078" stroke-width="2.2"/>
+<text x="313" y="710" class="small">환경별 저장소 선택</text>
+<rect x="72" y="732" width="216" height="125" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="94" y="761" class="label">LOCAL / VOLUME</text>
+<text x="94" y="797" class="name">SQLite</text>
+<text x="94" y="829" class="body">계정 · 펫 · 식단</text>
+<rect x="308" y="732" width="216" height="125" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="330" y="761" class="label">CLOUD</text>
+<text x="330" y="797" class="name">PostgreSQL</text>
+<text x="330" y="829" class="body">계정 · 펫 · 식단</text>
+<path d="M298 715H180V728" class="link"/><path d="M298 715H416V728" class="link"/>
+<rect x="72" y="877" width="452" height="94" rx="18" fill="#f9fcf9" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="94" y="910" class="label">참조 데이터 · 외부 제공자</text>
+<text x="94" y="941" class="body">CSV 제품 / 영양 기준 · OCR / 가격</text>
+<rect x="598" y="324" width="366" height="143" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="620" y="353" class="label">VALIDATION CLIENT</text>
+<text x="620" y="389" class="name">API 검증 요청</text>
+<text x="620" y="421" class="body">핵심 흐름 포팅 · 계약 비교</text>
+<text x="620" y="448" class="body">기존 앱의 기본 연결은 FastAPI</text>
+<path d="M781 467V516" class="link"/>
+<text x="796" y="497.5" class="small">HTTP / JSON</text>
+<rect x="598" y="520" width="366" height="160" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="620" y="549" class="label">MIGRATION API · :8757</text>
+<text x="620" y="585" class="name">Spring Boot</text>
+<text x="620" y="617" class="body">분석 · 인증 · 펫 · 제품 · 식단</text>
+<text x="620" y="644" class="body">현재 프론트와 API 계약 차이 존재</text>
+<path d="M781 680V728" class="link"/>
+<text x="796" y="710" class="small">독립 데이터 저장</text>
+<rect x="598" y="732" width="366" height="125" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="620" y="761" class="label">SPRING DATA</text>
+<text x="620" y="797" class="name">별도 SQLite</text>
+<text x="620" y="829" class="body">사용자 · 세션 · 펫 · 제품 · 식단</text>
+<rect x="598" y="877" width="366" height="94" rx="18" fill="#fffcf7" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="620" y="910" class="label">참조 데이터</text>
+<text x="620" y="941" class="body">리소스 CSV · 제품 / 영양 기준</text>
+<rect x="1038" y="324" width="450" height="143" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="1060" y="353" class="label">CLIENT · VERCEL</text>
+<text x="1060" y="389" class="name">Next.js 보호소 UI</text>
+<text x="1060" y="421" class="body">동물 로스터 · 급여표 · 재고 · 예산</text>
+<text x="1060" y="448" class="body">브라우저 내 영양 계산 / JSON 기준</text>
+<path d="M1263 467V516" class="link"/>
+<text x="1278" y="497.5" class="small">동일 서비스 API 요청</text>
+<rect x="1038" y="520" width="450" height="160" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="1060" y="549" class="label">SERVER · NEXT.JS</text>
+<text x="1060" y="585" class="name">Route Handlers</text>
+<text x="1060" y="617" class="body">접근 키 세션 · 상태 읽기 / 저장</text>
+<text x="1060" y="644" class="body">/api/state · revision 충돌 검사</text>
+<path d="M1263 680V728" class="link"/>
+<text x="1278" y="710" class="small">Drizzle ORM</text>
+<rect x="1038" y="732" width="450" height="125" rx="18" fill="#fff" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="1060" y="761" class="label">SHELTER DATA</text>
+<text x="1060" y="797" class="name">Neon PostgreSQL</text>
+<text x="1060" y="829" class="body">shelter_state · 공유 상태 / revision</text>
+<rect x="1038" y="877" width="450" height="94" rx="18" fill="#f8fbfe" stroke="#d9e3dd" stroke-width="1.5"/>
+<text x="1060" y="910" class="label">인증 · 동시 수정</text>
+<text x="1060" y="941" class="body">직원 공유 접근 키 · 충돌 시 409</text>
+<path d="M56 1036H1504" stroke="#d6dfd6" stroke-width="1.5"/><text x="56" y="1074" class="label">읽는 방법</text>
+<text x="176" y="1074" class="body">실선 화살표는 요청·저장 흐름입니다. 각 영역은 자체 API와 저장소를 사용합니다.</text>
+<text x="56" y="1114" class="label">전환 상태</text>
+<text x="176" y="1114" class="body">Spring은 전환 검증 대상이며, FastAPI → Spring → 보호소로 이어지는 호출 구조가 아닙니다.</text>
+<text x="56" y="1152" class="label">데이터 기준</text>
+<text x="176" y="1152" class="body">영양 기준·제품·가격은 기능 검증용 데모 데이터입니다.</text>
+</svg>
