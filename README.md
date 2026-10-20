@@ -131,8 +131,6 @@ cd frontend && npm run build                 # 프론트 타입체크 + 프로�
 
 ---
 
-## petbalance 조직 소개
-
 # petbalance
 
 반려동물의 식단과 보호소 운영을 더 명확하고 안전하게 만드는 서비스를 만듭니다.
